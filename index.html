@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Factorisation Blitz - Dad Joke Edition</title>
     <style>
         :root {
@@ -24,43 +24,46 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; /* Changed to start to allow scrolling if needed */
             min-height: 100vh;
-            overflow: hidden;
+            width: 100%;
         }
 
         #game-container {
-            width: 98%;
-            max-width: 800px;
+            width: 100%;
+            max-width: 600px;
             text-align: center;
             padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
         }
 
         #joke-container {
             background: #1e1b4b;
             border: 2px solid var(--accent);
             border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-            min-height: 80px;
+            padding: 12px;
+            margin-bottom: 10px;
+            min-height: 60px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-size: 0.9rem;
         }
 
         #joke-setup {
             font-style: italic;
             color: #c4b5fd;
-            font-size: 1rem;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
 
         #joke-punchline {
             font-weight: bold;
             color: var(--match-color);
             background: #000;
-            padding: 4px 8px;
+            padding: 2px 6px;
             border-radius: 4px;
             filter: blur(5px);
             transition: filter 0.5s ease;
@@ -75,50 +78,57 @@
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
         .stat-card {
             background: var(--card-bg);
-            padding: 8px;
+            padding: 6px;
             border-radius: 8px;
             border: 1px solid #334155;
         }
 
-        .stat-label { font-size: 0.65rem; text-transform: uppercase; color: #94a3b8; }
-        .stat-value { font-size: 1.1rem; font-weight: bold; display: block; }
+        .stat-label { font-size: 0.6rem; text-transform: uppercase; color: #94a3b8; }
+        .stat-value { font-size: 1rem; font-weight: bold; display: block; }
 
         #grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 8px;
+            grid-template-columns: repeat(4, 1fr); /* 4 columns is safer for mobile */
+            gap: 6px;
             margin-bottom: 10px;
+            width: 100%;
         }
 
-        @media (max-width: 600px) {
-            #grid { grid-template-columns: repeat(4, 1fr); }
+        @media (min-width: 600px) {
+            #grid { grid-template-columns: repeat(6, 1fr); }
         }
 
         .tile {
-            aspect-ratio: 1 / 0.8;
+            aspect-ratio: 1 / 1; /* Square tiles are more predictable */
             background: var(--card-bg);
             border: 2px solid #334155;
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.9rem;
+            font-size: 0.75rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.15s ease;
             user-select: none;
             text-align: center;
-            padding: 4px;
+            padding: 2px;
+            word-break: break-word;
+            overflow: hidden;
+        }
+
+        @media (min-width: 400px) {
+            .tile { font-size: 0.85rem; }
         }
 
         .tile:hover { background: #334155; }
-        .tile.selected { background: #475569; border-color: var(--text); transform: scale(1.05); z-index: 2; }
+        .tile.selected { background: #475569; border-color: var(--text); transform: scale(1.02); z-index: 2; }
         .tile.quadratic { color: var(--quadratic-color); border-color: var(--quadratic-color); }
         .tile.factor { color: var(--factor-color); border-color: var(--factor-color); }
 
@@ -144,39 +154,41 @@
         .instruction-box {
             text-align: left;
             background: #1e293b;
-            padding: 25px;
+            padding: 20px;
             border-radius: 12px;
-            margin: 20px 0;
+            margin: 15px 0;
             max-width: 450px;
-            line-height: 1.6;
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
 
         .btn {
             background: var(--match-color);
             color: white;
             border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
+            padding: 12px 30px;
+            font-size: 1.1rem;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            margin-top: 20px;
+            margin-top: 10px;
+            width: 80%;
+            max-width: 300px;
         }
     </style>
 </head>
 <body>
 
 <div id="overlay">
-    <div style="max-width: 550px;">
-        <h1 style="color: var(--match-color);">FACTORISATION BLITZ</h1>
-        <h3 style="margin-top: -15px; color: var(--accent);">Dad Joke Edition</h3>
+    <div style="width: 100%; max-width: 550px; display: flex; flex-direction: column; align-items: center;">
+        <h1 style="color: var(--match-color); font-size: 1.8rem; margin-bottom: 5px;">FACTORISATION BLITZ</h1>
+        <h3 style="margin: 0; color: var(--accent);">Dad Joke Edition</h3>
         
         <div class="instruction-box">
             <b>How to Play:</b>
-            <p>1. Select <b>ONE</b> <span style="color: var(--quadratic-color);">ORANGE</span> tile (the Quadratic Equation).</p>
-            <p>2. Select <b>TWO</b> <span style="color: var(--factor-color);">BLUE</span> tiles (the correct Factors).</p>
-            <p>3. Match all 8 sets to unlock the <b>Mystery Dad Joke</b> punchline!</p>
-            <p>4. Don't rush! Any correct factor works for its equation.</p>
+            <p>1. Select <b>ONE</b> <span style="color: var(--quadratic-color);">ORANGE</span> tile (Equation).</p>
+            <p>2. Select <b>TWO</b> <span style="color: var(--factor-color);">BLUE</span> tiles (Factors).</p>
+            <p>3. Match all 8 sets to reveal the <b>Punchline</b>!</p>
         </div>
         
         <button class="btn" onclick="startGame()">START LEVEL 1</button>
@@ -207,7 +219,7 @@
     <div id="grid"></div>
     
     <div id="next-level-area" style="display: none; margin-top: 10px;">
-        <button class="btn" onclick="nextLevel()">NEXT LEVEL & NEXT JOKE →</button>
+        <button class="btn" style="width: 100%; max-width: none;" onclick="nextLevel()">NEXT LEVEL →</button>
     </div>
 </div>
 
@@ -232,7 +244,6 @@
         { s: "What do you call an empty parrot cage?", p: "A Polygon!" }
     ];
     
-    // Each question now includes the mathematical values for verification
     const questionPool = [
         { q: "x² + 5x + 6", a: 2, b: 3 },
         { q: "x² - 5x + 6", a: -2, b: -3 },
@@ -284,7 +295,6 @@
         const tiles = [];
 
         sets.forEach(set => {
-            // Store the mathematical value in dataset
             tiles.push({ text: set.q, type: 'quadratic', valA: set.a, valB: set.b });
             tiles.push({ text: `(x ${set.a >= 0 ? '+' : '-'} ${Math.abs(set.a)})`, type: 'factor', val: set.a });
             tiles.push({ text: `(x ${set.b >= 0 ? '+' : '-'} ${Math.abs(set.b)})`, type: 'factor', val: set.b });
@@ -335,9 +345,6 @@
             const f1 = parseInt(factors[0].dataset.val);
             const f2 = parseInt(factors[1].dataset.val);
 
-            // Check if the sum and product match the quadratic roots properties
-            // (x+f1)(x+f2) = x^2 + (f1+f2)x + (f1*f2)
-            // We compare the selected factors to the target roots of the equation
             if ((f1 === targetA && f2 === targetB) || (f1 === targetB && f2 === targetA)) {
                 isCorrect = true;
             }
