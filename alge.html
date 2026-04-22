@@ -3,454 +3,475 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Algebra Lab Escape</title>
+    <title>Escape from Algebra Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --accent-blue: #38bdf8;
-            --accent-green: #4ade80;
-            --accent-red: #f43f5e;
-            --text-main: #f1f5f9;
-            --text-dim: #94a3b8;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;600;800&display=swap');
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* slate-900 */
+            color: #f8fafc; /* slate-50 */
+            background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
-        #game-container {
-            width: 95%;
-            max-width: 650px;
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.1);
-            position: relative;
+        .mono {
+            font-family: 'Share Tech Mono', monospace;
         }
 
-        /* Header & Stats */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid rgba(255,255,255,0.1);
+        .terminal-box {
+            background-color: #1e293b; /* slate-800 */
+            border: 2px solid #3b82f6; /* blue-500 */
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            border-radius: 0.75rem;
         }
 
-        .timer-box {
-            font-family: monospace;
-            font-size: 1.5rem;
-            color: var(--accent-blue);
-            background: rgba(0,0,0,0.3);
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-        }
-
-        .progress-tracker {
-            margin-bottom: 2rem;
-        }
-
-        .progress-bar {
-            height: 8px;
-            background: #334155;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 0.5rem;
-        }
-
-        #progress-fill {
-            height: 100%;
-            background: var(--accent-green);
-            width: 0%;
-            transition: width 0.4s ease;
-        }
-
-        /* Game Screens */
-        .screen { display: none; animation: fadeIn 0.5s ease; }
-        .active { display: block; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        h1, h2 { color: var(--accent-blue); margin-top: 0; }
-        p { line-height: 1.6; color: var(--text-dim); }
-
-        .story-text {
-            font-style: italic;
-            background: rgba(56, 189, 248, 0.1);
-            padding: 1rem;
-            border-left: 4px solid var(--accent-blue);
-            margin-bottom: 1.5rem;
-            font-size: 0.95rem;
-        }
-
-        .question-card {
-            background: rgba(0,0,0,0.2);
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        #math-display {
-            font-size: 2rem;
-            font-weight: bold;
-            letter-spacing: 2px;
-            margin: 1rem 0;
-            color: white;
-        }
-
-        /* Controls */
-        input[type="text"] {
+        .scanline {
             width: 100%;
-            padding: 1rem;
-            font-size: 1.2rem;
-            background: #0f172a;
-            border: 2px solid #334155;
-            border-radius: 0.5rem;
-            color: white;
-            text-align: center;
-            box-sizing: border-box;
-            outline: none;
-            transition: border-color 0.3s;
+            height: 100px;
+            z-index: 9999;
+            position: absolute;
+            pointer-events: none;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(59,130,246,0.2) 50%, rgba(0,0,0,0) 100%);
+            opacity: 0.1;
+            animation: scanline 10s linear infinite;
         }
 
-        input[type="text"]:focus { border-color: var(--accent-blue); }
-
-        .btn-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-top: 1.5rem;
+        @keyframes scanline {
+            0% { top: -100px; }
+            100% { top: 100%; }
         }
 
-        button {
-            padding: 1rem;
-            font-size: 1rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: transform 0.1s, opacity 0.2s;
+        .shake {
+            animation: shake 0.5s;
         }
 
-        button:active { transform: scale(0.98); }
-
-        .btn-primary { background: var(--accent-blue); color: #000; }
-        .btn-hint { background: #475569; color: white; }
-        .btn-start { background: var(--accent-green); color: #000; width: 100%; font-size: 1.2rem; }
-
-        /* Feedback UI */
-        #feedback-msg {
-            margin-top: 1rem;
-            text-align: center;
-            font-weight: bold;
-            min-height: 1.5rem;
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
         }
 
-        .msg-error { color: var(--accent-red); }
-        .msg-success { color: var(--accent-green); }
-
-        #hint-display {
-            display: none;
-            margin-top: 1rem;
-            padding: 1rem;
-            background: rgba(255,255,255,0.05);
-            border-radius: 0.5rem;
-            font-size: 0.9rem;
-            color: #cbd5e1;
+        .glow-text {
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.7);
         }
-
-        .score-board {
-            display: flex;
-            justify-content: center;
-            gap: 5px;
-            margin-top: 10px;
-        }
-
-        .score-dot {
-            width: 12px;
-            height: 12px;
-            background: #334155;
-            border-radius: 50%;
-        }
-
-        .dot-filled { background: var(--accent-green); box-shadow: 0 0 5px var(--accent-green); }
-
-        /* Mobile Adjustments */
-        @media (max-width: 480px) {
-            #math-display { font-size: 1.5rem; }
-            .btn-group { grid-template-columns: 1fr; }
+        
+        .math-text {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.2em;
+            letter-spacing: 1px;
+            background: rgba(0,0,0,0.3);
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
         }
     </style>
 </head>
-<body>
+<body class="relative overflow-x-hidden flex items-center justify-center p-4">
+    <div class="scanline"></div>
 
-<div id="game-container">
-    <!-- Intro Screen -->
-    <div id="screen-intro" class="screen active">
-        <h1>Welcome to the Algebra Lab</h1>
-        <p>A malfunction has sealed the high-security Algebra Lab! You are trapped inside. To unlock the exit, you must override 10 security terminals by solving algebraic codes.</p>
-        <div class="story-text">
-            "Warning: Oxygen levels stable for 15 minutes. Complete the sequence to initiate emergency ventilation."
-        </div>
-        <p><strong>Learning Objectives:</strong><br>
-        • Simplifying Expressions<br>
-        • Expanding Brackets<br>
-        • Factorising Expressions<br>
-        • Solving Algebraic Equations</p>
-        <button class="btn-start" onclick="startGame()">INITIATE OVERRIDE</button>
-    </div>
+    <!-- MAIN CONTAINER -->
+    <div class="w-full max-w-3xl z-10">
 
-    <!-- Game Screen -->
-    <div id="screen-game" class="screen">
-        <div class="header">
-            <div>
-                <span style="color: var(--text-dim)">TERMINAL</span>
-                <span id="level-num" style="font-weight: bold; font-size: 1.2rem; margin-left: 5px;">1/10</span>
+        <!-- INTRO SCREEN -->
+        <div id="intro-screen" class="terminal-box p-8 md:p-12 text-center transform transition-all duration-500">
+            <i class="fas fa-biohazard text-5xl text-blue-500 mb-6 glow-text"></i>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 glow-text mono">ALGEBRA LAB ESCAPE</h1>
+            <p class="text-slate-300 mb-6 text-lg">
+                You have been locked inside the top-secret laboratory of the eccentric Dr. X. 
+                The main door is sealed, and a security system has activated.
+            </p>
+            <div class="bg-slate-900 border border-slate-700 p-6 rounded-lg text-left mb-8">
+                <h3 class="text-xl text-blue-400 font-semibold mb-2"><i class="fas fa-clipboard-list mr-2"></i> Mission Briefing:</h3>
+                <ul class="list-disc list-inside text-slate-300 space-y-2">
+                    <li>Solve <strong>10 algebraic security locks</strong> to escape.</li>
+                    <li>Topics: Simplifying, Expanding, Factorising, and Solving Equations.</li>
+                    <li>Type answers without worrying about spaces (e.g., <span class="math-text">2x+3</span>).</li>
+                    <li>If you get stuck, use the <strong>Hint System</strong> to bypass security firewalls.</li>
+                    <li>You have exactly <strong>30 minutes</strong>.</li>
+                </ul>
             </div>
-            <div id="timer" class="timer-box">15:00</div>
+            <button onclick="startGame()" class="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-10 rounded-lg text-xl shadow-[0_0_15px_rgba(37,99,235,0.6)] transition-all transform hover:scale-105 active:scale-95">
+                <i class="fas fa-unlock-alt mr-2"></i> INITIATE ESCAPE SEQUENCE
+            </button>
         </div>
 
-        <div class="progress-tracker">
-            <div id="progress-fill"></div>
-            <div class="score-board" id="score-dots"></div>
-        </div>
-
-        <div id="story-context" class="story-text">Connecting to terminal...</div>
-
-        <div class="question-card">
-            <div id="question-label" style="color: var(--accent-blue); font-size: 0.8rem; text-transform: uppercase;">Task</div>
-            <div id="math-display">3x + 5x</div>
-        </div>
-
-        <input type="text" id="answer-input" placeholder="Type result..." autocomplete="off">
-        
-        <div id="feedback-msg"></div>
-
-        <div class="btn-group">
-            <button class="btn-hint" onclick="showHint()">HELP PROTOCOL</button>
-            <button class="btn-primary" onclick="checkAnswer()">SUBMIT CODE</button>
-        </div>
-
-        <div id="hint-display"></div>
-    </div>
-
-    <!-- Win Screen -->
-    <div id="screen-win" class="screen">
-        <h1 style="color: var(--accent-green)">EXIT SECURED</h1>
-        <p>The doors hiss open. You've successfully overridden the lab's security system using pure mathematical logic. The head scientist is impressed!</p>
-        <div class="story-text">"Override complete. All systems nominal. Welcome back, Professor."</div>
-        <button class="btn-start" onclick="location.reload()">REPLAY CHALLENGE</button>
-    </div>
-
-    <!-- Lose Screen -->
-    <div id="screen-lose" class="screen">
-        <h1 style="color: var(--accent-red)">LOCKDOWN PERMANENT</h1>
-        <p>The timer reached zero. The lab is completely sealed. Better luck next time!</p>
-        <button class="btn-start" onclick="location.reload()">REBOOT SYSTEM</button>
-    </div>
-</div>
-
-<script>
-    // Game Content
-    const tasks = [
-        {
-            story: "The keypad is dusty. Simplify this expression to power up the screen.",
-            question: "4x + 3x + 2x",
-            answer: "9x",
-            hint: "Since they are all 'x' terms, just add the numbers together: 4 + 3 + 2 = ?"
-        },
-        {
-            story: "Warning: Data corruption detected. Group the like terms to clean the file.",
-            question: "5a + 2b + 3a + 4b",
-            answer: "8a+6b",
-            hint: "Add the 'a' terms together (5a+3a) and the 'b' terms together (2b+4b) separately."
-        },
-        {
-            story: "A bracket lock! Expand it to release the first latch.",
-            question: "3(x + 5)",
-            answer: "3x+15",
-            hint: "Multiply the 3 outside by the 'x' inside, then multiply the 3 by the 5. (3 * x) + (3 * 5)"
-        },
-        {
-            story: "Secondary security layer. Expand and simplify carefully.",
-            question: "2(y - 4)",
-            answer: "2y-8",
-            hint: "Watch the minus sign! Multiply 2 by 'y', then multiply 2 by -4."
-        },
-        {
-            story: "The system requires factorisation. Pull out the highest common factor.",
-            question: "Factorise: 4x + 12",
-            answer: "4(x+3)",
-            hint: "What is the biggest number that divides both 4 and 12? Put it outside the brackets."
-        },
-        {
-            story: "Pressure is rising! Factorise this algebraic expression.",
-            question: "Factorise: 5ab + 10a",
-            answer: "5a(b+2)",
-            hint: "Both parts have a '5' hidden in them and an 'a'. Put '5a' outside the brackets."
-        },
-        {
-            story: "Terminal 7 requires a specific value for x to unlock.",
-            question: "Solve: x + 7 = 15",
-            answer: "8",
-            hint: "To get 'x' alone, do the opposite of adding 7. Subtract 7 from 15."
-        },
-        {
-            story: "Communication relay failing. Solve this division equation.",
-            question: "Solve: x / 3 = 6",
-            answer: "18",
-            hint: "The opposite of dividing by 3 is multiplying. What is 6 times 3?"
-        },
-        {
-            story: "Master bypass nearly ready. This is a two-step equation.",
-            question: "Solve: 2x - 3 = 7",
-            answer: "5",
-            hint: "Step 1: Add 3 to 7. Step 2: Divide that answer by 2."
-        },
-        {
-            story: "Final door! Solve the complex override code.",
-            question: "Solve: 3x + 4 = 19",
-            answer: "5",
-            hint: "Step 1: Subtract 4 from 19. Step 2: Divide that result by 3."
-        }
-    ];
-
-    let currentLevel = 0;
-    let timeRemaining = 900; // 15 mins
-    let timerInterval;
-
-    // Initialization
-    function startGame() {
-        showScreen('screen-game');
-        initDots();
-        updateLevel();
-        startTimer();
-    }
-
-    function initDots() {
-        const container = document.getElementById('score-dots');
-        for (let i = 0; i < tasks.length; i++) {
-            const dot = document.createElement('div');
-            dot.className = 'score-dot';
-            dot.id = `dot-${i}`;
-            container.appendChild(dot);
-        }
-    }
-
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
-
-    function startTimer() {
-        timerInterval = setInterval(() => {
-            timeRemaining--;
-            const mins = Math.floor(timeRemaining / 60);
-            const secs = timeRemaining % 60;
-            document.getElementById('timer').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+        <!-- GAME SCREEN -->
+        <div id="game-screen" class="hidden">
             
-            if (timeRemaining <= 60) {
-                document.getElementById('timer').style.color = 'var(--accent-red)';
+            <!-- Top HUD -->
+            <div class="flex flex-col md:flex-row justify-between items-center bg-slate-800 border-b-2 border-blue-500 p-4 rounded-t-lg shadow-lg">
+                <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                    <div class="text-slate-400 mono">SECURITY BREACH PROGRESS:</div>
+                    <div class="flex space-x-1" id="progress-dots">
+                        <!-- Dots populated by JS -->
+                    </div>
+                    <span id="score-text" class="font-bold text-blue-400">0/10</span>
+                </div>
+                <div class="flex items-center bg-slate-900 px-4 py-2 rounded border border-slate-700">
+                    <i class="fas fa-clock text-red-500 mr-2 animate-pulse"></i>
+                    <span id="timer" class="mono text-2xl text-red-400 font-bold">30:00</span>
+                </div>
+            </div>
+
+            <!-- Main Game Area -->
+            <div class="terminal-box rounded-t-none p-6 md:p-8">
+                
+                <!-- Story Context -->
+                <div class="mb-6 flex items-start space-x-3 text-slate-300 bg-slate-900/50 p-4 rounded border-l-4 border-blue-500">
+                    <i class="fas fa-user-secret text-xl text-blue-400 mt-1"></i>
+                    <p id="story-text" class="italic">Story text goes here...</p>
+                </div>
+
+                <!-- The Task -->
+                <div class="mb-8 text-center">
+                    <h2 class="text-sm font-bold text-blue-500 uppercase tracking-widest mb-2" id="question-type">Simplifying Expressions</h2>
+                    <p class="text-slate-400 mb-4 text-sm" id="question-instruction">Combine the like terms to unlock this terminal.</p>
+                    <div class="text-3xl md:text-4xl py-6 bg-slate-900 border border-slate-600 rounded-lg shadow-inner font-serif text-white tracking-wider" id="question-text">
+                        3x + 5y - x + 2y
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="relative max-w-md mx-auto">
+                    <input type="text" id="answer-input" autocomplete="off" placeholder="Enter your answer here..." 
+                           class="w-full bg-slate-900 border-2 border-slate-600 focus:border-blue-500 text-white text-lg rounded-lg py-3 px-4 outline-none transition-colors text-center font-mono placeholder-slate-500"
+                           onkeypress="handleKeyPress(event)">
+                    
+                    <!-- Feedback Message -->
+                    <div id="feedback-msg" class="absolute -bottom-8 left-0 w-full text-center font-bold text-sm hidden">
+                        Message goes here
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-12 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <button onclick="checkAnswer()" id="submit-btn" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition-colors flex items-center justify-center">
+                        <i class="fas fa-terminal mr-2"></i> SUBMIT ANSWER
+                    </button>
+                    <button onclick="showHint()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition-colors flex items-center justify-center">
+                        <i class="fas fa-lightbulb mr-2"></i> DECRYPT HINT
+                    </button>
+                </div>
+
+                <!-- Hint Display -->
+                <div id="hint-box" class="hidden mt-8 p-4 bg-amber-900/30 border border-amber-600/50 rounded-lg text-amber-200">
+                    <div class="font-bold mb-1 flex items-center text-amber-400"><i class="fas fa-info-circle mr-2"></i> SYSTEM HINT:</div>
+                    <p id="hint-text">Hint goes here...</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- END SCREEN -->
+        <div id="end-screen" class="hidden terminal-box p-8 md:p-12 text-center">
+            <div id="end-icon" class="text-6xl mb-6"></div>
+            <h1 id="end-title" class="text-4xl md:text-5xl font-bold mb-4 glow-text mono"></h1>
+            <p id="end-desc" class="text-slate-300 mb-8 text-xl"></p>
+            
+            <div class="bg-slate-900 border border-slate-700 p-6 rounded-lg inline-block mb-8">
+                <p class="text-slate-400 mb-2">Final Time Remaining:</p>
+                <p id="final-time" class="text-3xl text-blue-400 font-mono font-bold">00:00</p>
+            </div>
+
+            <div>
+                <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition-transform hover:scale-105">
+                    <i class="fas fa-redo mr-2"></i> PLAY AGAIN
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- GAME DATA: 10 Questions Aligned to Sec 2 G2 Algebra ---
+        const questions = [
+            {
+                type: "Level 1: Simplify Expressions",
+                instruction: "Combine the like terms (terms with the same letters).",
+                story: "You approach the first security door. The keypad demands that you simplify the security code by grouping similar items together.",
+                equation: "3x + 5y - x + 2y",
+                answers: ["2x+7y", "7y+2x"],
+                hint: "Group the x terms together (3x - 1x) and the y terms together (+5y + 2y). If there is no number in front of x, it means 1x."
+            },
+            {
+                type: "Level 2: Simplify with Negatives",
+                instruction: "Combine the like terms. Watch out for negative signs!",
+                story: "The second door's terminal is flashing red. Dr. X has added negative numbers to confuse the system. Clear the errors!",
+                equation: "5a - 2b - 7a + 6b",
+                answers: ["-2a+4b", "4b-2a"],
+                hint: "Group the 'a's: (5a - 7a). If you have $5 and owe $7, you are at -2. Then group the 'b's: (-2b + 6b)."
+            },
+            {
+                type: "Level 3: Expand Brackets",
+                instruction: "Multiply the outside number with every term inside the bracket.",
+                story: "A laser grid blocks the hallway. To deactivate it, you must 'expand' the energy output by removing the brackets.",
+                equation: "3(2m + 4)",
+                answers: ["6m+12", "12+6m"],
+                hint: "Multiply the 3 by the first term (3 × 2m). Then multiply the 3 by the second term (3 × 4). Combine the results."
+            },
+            {
+                type: "Level 4: Expand with Negatives",
+                instruction: "Expand the bracket. Remember the rules for multiplying negative numbers!",
+                story: "The temperature is dropping. The heating system requires a negative expansion to reboot.",
+                equation: "-2(y - 5)",
+                answers: ["-2y+10", "10-2y"],
+                hint: "Multiply -2 by y to get -2y. Then multiply -2 by -5. Remember: A negative times a negative becomes a positive!"
+            },
+            {
+                type: "Level 5: Factorise Simple Expressions",
+                instruction: "Find the highest common factor and put it outside the bracket.",
+                story: "You found a locked safe. To open it, you must do the reverse of expanding. Condense the code by 'factorising' it.",
+                equation: "4x + 12",
+                answers: ["4(x+3)", "(x+3)4"],
+                hint: "What is the biggest number that can divide both 4 and 12? It's 4. Put 4 outside the bracket, and divide each term by 4 to find what goes inside."
+            },
+            {
+                type: "Level 6: Factorise with Variables",
+                instruction: "Take out the common number factor.",
+                story: "The central computer requires compression. Factorise the sequence to save memory space.",
+                equation: "15p - 5",
+                answers: ["5(3p-1)", "-5(-3p+1)"],
+                hint: "Both 15 and 5 can be divided by 5. Put 5 outside the bracket. What happens when you divide 15p by 5? What about -5 divided by 5?"
+            },
+            {
+                type: "Level 7: Solve 1-Step Equation (+/-)",
+                instruction: "Find the value of the unknown letter. Enter a NUMBER only.",
+                story: "You enter the main lab. A toxic gas leak is imminent! Find the exact value of 'x' to shut off the valve.",
+                equation: "x + 7 = 15",
+                answers: ["8"],
+                hint: "You want 'x' to be alone on one side. What is the opposite of adding 7? Subtract 7 from BOTH sides of the equal sign."
+            },
+            {
+                type: "Level 8: Solve 1-Step Equation (×/÷)",
+                instruction: "Find the value of the unknown letter. Enter a NUMBER only.",
+                story: "The ventilation fan is jammed. Solve for 'y' to restore power to the fan motor.",
+                equation: "4y = 24",
+                answers: ["6"],
+                hint: "4y means 4 times y. To undo multiplication, you must divide. Divide both sides of the equation by 4."
+            },
+            {
+                type: "Level 9: Solve 2-Step Equation",
+                instruction: "Find the value of the unknown letter. Enter a NUMBER only.",
+                story: "Almost out! The exit door requires a two-step verification. Uncover the value of 'k'.",
+                equation: "3k - 5 = 10",
+                answers: ["5"],
+                hint: "Step 1: Get rid of the -5 by adding 5 to both sides. \nStep 2: You will have 3k = 15. Now divide both sides by 3."
+            },
+            {
+                type: "Level 10: Master Challenge",
+                instruction: "Solve the 2-step equation involving division. Enter a NUMBER only.",
+                story: "This is the final lock! Dr. X's master firewall. Defeat it, and the outside world is yours!",
+                equation: "m/2 + 4 = 10",
+                answers: ["12"],
+                hint: "Step 1: Remove the +4 by subtracting 4 from both sides. \nStep 2: You will have m/2 = 6. Since 'm' is divided by 2, do the opposite: multiply both sides by 2."
             }
-            if (timeRemaining <= 0) {
-                clearInterval(timerInterval);
-                showScreen('screen-lose');
+        ];
+
+        // --- GAME STATE ---
+        let currentLevel = 0;
+        let timeRemaining = 1800; // 30 minutes in seconds
+        let timerInterval;
+
+        // --- DOM ELEMENTS ---
+        const screens = {
+            intro: document.getElementById('intro-screen'),
+            game: document.getElementById('game-screen'),
+            end: document.getElementById('end-screen')
+        };
+        const ui = {
+            timer: document.getElementById('timer'),
+            progressDots: document.getElementById('progress-dots'),
+            scoreText: document.getElementById('score-text'),
+            story: document.getElementById('story-text'),
+            type: document.getElementById('question-type'),
+            instruction: document.getElementById('question-instruction'),
+            equation: document.getElementById('question-text'),
+            input: document.getElementById('answer-input'),
+            feedback: document.getElementById('feedback-msg'),
+            hintBox: document.getElementById('hint-box'),
+            hintText: document.getElementById('hint-text')
+        };
+
+        // --- FUNCTIONS ---
+
+        function startGame() {
+            screens.intro.classList.add('hidden');
+            screens.game.classList.remove('hidden');
+            
+            // Build progress dots
+            ui.progressDots.innerHTML = '';
+            for (let i = 0; i < questions.length; i++) {
+                const dot = document.createElement('div');
+                dot.className = `w-3 h-3 rounded-full border border-slate-500 bg-slate-800 transition-colors`;
+                dot.id = `dot-${i}`;
+                ui.progressDots.appendChild(dot);
             }
-        }, 1000);
-    }
 
-    function updateLevel() {
-        const task = tasks[currentLevel];
-        document.getElementById('level-num').textContent = `${currentLevel + 1}/10`;
-        document.getElementById('story-context').textContent = task.story;
-        document.getElementById('math-display').textContent = task.question;
-        document.getElementById('answer-input').value = "";
-        document.getElementById('feedback-msg').textContent = "";
-        document.getElementById('hint-display').style.display = "none";
-        document.getElementById('answer-input').focus();
-        
-        // Progress UI
-        const percent = ((currentLevel) / tasks.length) * 100;
-        document.getElementById('progress-fill').style.width = `${percent}%`;
-        
-        // Update dots
-        for(let i=0; i<currentLevel; i++) {
-            document.getElementById(`dot-${i}`).classList.add('dot-filled');
+            // Start Timer
+            timerInterval = setInterval(updateTimer, 1000);
+            
+            // Load first question
+            loadQuestion(0);
         }
-    }
 
-    function showHint() {
-        const display = document.getElementById('hint-display');
-        display.textContent = tasks[currentLevel].hint;
-        display.style.display = "block";
-    }
-
-    function checkAnswer() {
-        const input = document.getElementById('answer-input').value.toLowerCase().replace(/\s/g, '');
-        const correct = tasks[currentLevel].answer.toLowerCase().replace(/\s/g, '');
-        const feedback = document.getElementById('feedback-msg');
-
-        if (input === correct) {
-            feedback.textContent = "✓ ACCESS GRANTED";
-            feedback.className = "msg-success";
+        function loadQuestion(index) {
+            currentLevel = index;
+            const q = questions[index];
             
-            currentLevel++;
+            ui.story.innerText = q.story;
+            ui.type.innerText = q.type;
+            ui.instruction.innerText = q.instruction;
+            ui.equation.innerText = q.equation;
             
-            if (currentLevel >= tasks.length) {
-                // Final progress fill
-                document.getElementById('progress-fill').style.width = `100%`;
-                document.getElementById(`dot-${tasks.length-1}`).classList.add('dot-filled');
+            ui.input.value = '';
+            ui.input.focus();
+            
+            ui.hintBox.classList.add('hidden');
+            ui.hintText.innerText = q.hint;
+            
+            hideFeedback();
+            updateProgressUI();
+        }
+
+        function updateProgressUI() {
+            ui.scoreText.innerText = `${currentLevel}/${questions.length}`;
+            for (let i = 0; i < questions.length; i++) {
+                const dot = document.getElementById(`dot-${i}`);
+                if (i < currentLevel) {
+                    dot.className = `w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]`;
+                } else if (i === currentLevel) {
+                    dot.className = `w-3 h-3 rounded-full bg-amber-400 animate-pulse`;
+                } else {
+                    dot.className = `w-3 h-3 rounded-full border border-slate-600 bg-slate-800`;
+                }
+            }
+        }
+
+        function normalizeAnswer(str) {
+            // Remove all spaces and convert to lowercase for flexible checking
+            return str.replace(/\s+/g, '').toLowerCase();
+        }
+
+        function checkAnswer() {
+            const rawInput = ui.input.value;
+            if (rawInput.trim() === '') return;
+
+            const studentAnswer = normalizeAnswer(rawInput);
+            const q = questions[currentLevel];
+            
+            // Check if student answer matches any of the accepted answers
+            const isCorrect = q.answers.some(ans => normalizeAnswer(ans) === studentAnswer);
+
+            if (isCorrect) {
+                showFeedback("Access Granted! Security lock bypassed.", true);
+                document.getElementById('submit-btn').disabled = true;
                 
                 setTimeout(() => {
-                    clearInterval(timerInterval);
-                    showScreen('screen-win');
-                }, 800);
+                    document.getElementById('submit-btn').disabled = false;
+                    if (currentLevel + 1 < questions.length) {
+                        loadQuestion(currentLevel + 1);
+                    } else {
+                        endGame(true);
+                    }
+                }, 1500);
             } else {
-                setTimeout(updateLevel, 800);
+                showFeedback("Access Denied! Incorrect code.", false);
+                ui.input.parentElement.classList.add('shake');
+                setTimeout(() => ui.input.parentElement.classList.remove('shake'), 500);
             }
-        } else {
-            feedback.textContent = "✗ INVALID CODE";
-            feedback.className = "msg-error";
-            // Shake effect
-            const card = document.querySelector('.question-card');
-            card.style.animation = 'none';
-            setTimeout(() => card.style.animation = 'shake 0.3s ease', 10);
         }
-    }
 
-    // Handle Enter key
-    document.getElementById('answer-input').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            checkAnswer();
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                checkAnswer();
+            }
         }
-    });
 
-    // Add simple CSS shake animation for errors
-    const style = document.createElement('style');
-    style.innerHTML = `
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
+        function showHint() {
+            ui.hintBox.classList.remove('hidden');
+            ui.hintBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            // Optional: Penalize time slightly for using a hint? (Decided not to, to encourage weaker students to use it).
         }
-    `;
-    document.head.appendChild(style);
-</script>
 
+        function showFeedback(message, isSuccess) {
+            ui.feedback.innerText = message;
+            ui.feedback.classList.remove('hidden', 'text-green-400', 'text-red-400');
+            
+            if (isSuccess) {
+                ui.feedback.classList.add('text-green-400');
+                ui.input.classList.remove('border-slate-600', 'border-red-500', 'focus:border-blue-500');
+                ui.input.classList.add('border-green-500');
+            } else {
+                ui.feedback.classList.add('text-red-400');
+                ui.input.classList.remove('border-slate-600', 'border-green-500', 'focus:border-blue-500');
+                ui.input.classList.add('border-red-500');
+                
+                // Reset border after 2 seconds
+                setTimeout(() => {
+                    ui.input.classList.remove('border-red-500');
+                    ui.input.classList.add('border-slate-600', 'focus:border-blue-500');
+                }, 2000);
+            }
+        }
+
+        function hideFeedback() {
+            ui.feedback.classList.add('hidden');
+            ui.input.classList.remove('border-green-500', 'border-red-500');
+            ui.input.classList.add('border-slate-600', 'focus:border-blue-500');
+        }
+
+        function updateTimer() {
+            if (timeRemaining <= 0) {
+                endGame(false);
+                return;
+            }
+            
+            timeRemaining--;
+            
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            
+            ui.timer.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeRemaining < 300) { // Under 5 minutes
+                ui.timer.classList.remove('text-red-400');
+                ui.timer.classList.add('text-red-500');
+                ui.timer.parentElement.classList.add('bg-red-900/30', 'border-red-500');
+            }
+        }
+
+        function endGame(isVictory) {
+            clearInterval(timerInterval);
+            screens.game.classList.add('hidden');
+            screens.end.classList.remove('hidden');
+            
+            const finalTimeText = ui.timer.innerText;
+            document.getElementById('final-time').innerText = finalTimeText;
+
+            if (isVictory) {
+                document.getElementById('end-icon').innerHTML = '<i class="fas fa-door-open text-green-400 glow-text"></i>';
+                document.getElementById('end-title').innerText = 'ESCAPE SUCCESSFUL!';
+                document.getElementById('end-title').classList.add('text-green-400');
+                document.getElementById('end-desc').innerText = "Congratulations! You successfully hacked all of Dr. X's terminals and escaped the Algebra Lab before the toxic gas deployed.";
+            } else {
+                document.getElementById('end-icon').innerHTML = '<i class="fas fa-skull-crossbones text-red-500 glow-text"></i>';
+                document.getElementById('end-title').innerText = 'SYSTEM LOCKDOWN!';
+                document.getElementById('end-title').classList.add('text-red-500');
+                document.getElementById('end-desc').innerText = "Time has run out. The security systems have sealed the lab permanently. Your algebra skills need more training!";
+            }
+        }
+
+    </script>
 </body>
 </html>
