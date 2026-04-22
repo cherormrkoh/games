@@ -8,8 +8,8 @@
         :root {
             --bg: #0f172a;
             --card-bg: #1e293b;
-            --quadratic-color: #f59e0b; /* Orange */
-            --factor-color: #3b82f6;    /* Blue */
+            --quadratic-color: #f59e0b;
+            --factor-color: #3b82f6;
             --match-color: #10b981;
             --error-color: #ef4444;
             --text: #f8fafc;
@@ -182,13 +182,14 @@
 <div id="overlay">
     <div style="width: 100%; max-width: 550px; display: flex; flex-direction: column; align-items: center;">
         <h1 style="color: var(--match-color); font-size: 1.8rem; margin-bottom: 5px;">FACTORISATION BLITZ</h1>
-        <h3 style="margin: 0; color: var(--accent);">Dad Joke Edition</h3>
+        <h3 style="margin: 0; color: var(--accent);">Progressive Difficulty</h3>
         
         <div class="instruction-box">
-            <b>How to Play:</b>
-            <p>1. Select <b>ONE</b> <span style="color: var(--quadratic-color);">ORANGE</span> tile (Equation).</p>
-            <p>2. Select <b>TWO</b> <span style="color: var(--factor-color);">BLUE</span> tiles (Factors).</p>
-            <p>3. Match all 8 sets to reveal the <b>Punchline</b>!</p>
+            <b>Game Rules:</b>
+            <p>1. Select <b>ONE</b> <span style="color: var(--quadratic-color);">Equation</span>.</p>
+            <p>2. Select <b>TWO</b> <span style="color: var(--factor-color);">Factors</span>.</p>
+            <p>3. Solve the board to reveal a <b>Dad Joke</b>!</p>
+            <p><i>Levels 1-3 start with smaller numbers (under 20).</i></p>
         </div>
         
         <button class="btn" onclick="startGame()">START LEVEL 1</button>
@@ -244,37 +245,34 @@
         { s: "What do you call an empty parrot cage?", p: "A Polygon!" }
     ];
     
+    // 100 Question Pool sorted by complexity of the constant term (absolute value of product)
     const questionPool = [
-        // 1-10
-        { q: "x² + 5x + 6", a: 2, b: 3 }, { q: "x² - 5x + 6", a: -2, b: -3 }, { q: "x² + x - 6", a: 3, b: -2 }, { q: "x² - x - 6", a: -3, b: 2 }, { q: "x² + 7x + 10", a: 2, b: 5 },
-        { q: "x² - 7x + 10", a: -2, b: -5 }, { q: "x² + 3x - 10", a: 5, b: -2 }, { q: "x² - 3x - 10", a: -5, b: 2 }, { q: "x² + 8x + 12", a: 6, b: 2 }, { q: "x² - 4x - 12", a: -6, b: 2 },
-        // 11-20
-        { q: "x² + 4x - 12", a: 6, b: -2 }, { q: "x² - 8x + 12", a: -6, b: -2 }, { q: "x² + 9x + 20", a: 4, b: 5 }, { q: "x² - 9x + 20", a: -4, b: -5 }, { q: "x² + x - 20", a: 5, b: -4 },
-        { q: "x² - x - 20", a: -5, b: 4 }, { q: "x² + 7x + 12", a: 4, b: 3 }, { q: "x² - x - 12", a: -4, b: 3 }, { q: "x² + 11x + 24", a: 8, b: 3 }, { q: "x² - 11x + 24", a: -8, b: -3 },
-        // 21-30
-        { q: "x² + 2x - 24", a: 6, b: -4 }, { q: "x² - 2x - 24", a: -6, b: 4 }, { q: "x² + 10x + 24", a: 6, b: 4 }, { q: "x² + 10x + 21", a: 7, b: 3 }, { q: "x² - 10x + 21", a: -7, b: -3 },
-        { q: "x² + 4x - 21", a: 7, b: -3 }, { q: "x² - 4x - 21", a: -7, b: 3 }, { q: "x² + 13x + 30", a: 10, b: 3 }, { q: "x² - 13x + 30", a: -10, b: -3 }, { q: "x² + 7x - 30", a: 10, b: -3 },
-        // 31-40
-        { q: "x² - 7x - 30", a: -10, b: 3 }, { q: "x² + 11x + 30", a: 6, b: 5 }, { q: "x² - x - 30", a: -6, b: 5 }, { q: "x² + x - 30", a: 6, b: -5 }, { q: "x² + 13x + 40", a: 8, b: 5 },
-        { q: "x² - 13x + 40", a: -8, b: -5 }, { q: "x² + 3x - 40", a: 8, b: -5 }, { q: "x² - 3x - 40", a: -8, b: 5 }, { q: "x² + 14x + 48", a: 6, b: 8 }, { q: "x² - 14x + 48", a: -6, b: -8 },
-        // 41-50
-        { q: "x² + 2x - 48", a: 8, b: -6 }, { q: "x² - 2x - 48", a: -8, b: 6 }, { q: "x² + 16x + 60", a: 10, b: 6 }, { q: "x² - 16x + 60", a: -10, b: -6 }, { q: "x² + 4x - 60", a: 10, b: -6 },
-        { q: "x² - 4x - 60", a: -10, b: 6 }, { q: "x² + 17x + 72", a: 9, b: 8 }, { q: "x² - 17x + 72", a: -9, b: -8 }, { q: "x² + x - 72", a: 9, b: -8 }, { q: "x² - x - 72", a: -9, b: 8 },
-        // 51-60
-        { q: "x² + 11x + 18", a: 9, b: 2 }, { q: "x² - 11x + 18", a: -9, b: -2 }, { q: "x² + 7x - 18", a: 9, b: -2 }, { q: "x² - 7x - 18", a: -9, b: 2 }, { q: "x² + 19x + 90", a: 9, b: 10 },
-        { q: "x² - 19x + 90", a: -9, b: -10 }, { q: "x² + x - 90", a: 10, b: -9 }, { q: "x² - x - 90", a: -10, b: 9 }, { q: "x² + 20x + 100", a: 10, b: 10 }, { q: "x² - 20x + 100", a: -10, b: -10 },
-        // 61-70
-        { q: "x² + 12x + 20", a: 10, b: 2 }, { q: "x² - 12x + 20", a: -10, b: -2 }, { q: "x² + 8x - 20", a: 10, b: -2 }, { q: "x² - 8x - 20", a: -10, b: 2 }, { q: "x² + 21x + 20", a: 20, b: 1 },
-        { q: "x² + 12x + 35", a: 7, b: 5 }, { q: "x² - 12x + 35", a: -7, b: -5 }, { q: "x² + 2x - 35", a: 7, b: -5 }, { q: "x² - 2x - 35", a: -7, b: 5 }, { q: "x² + 15x + 50", a: 10, b: 5 },
-        // 71-80
-        { q: "x² - 15x + 50", a: -10, b: -5 }, { q: "x² + 5x - 50", a: 10, b: -5 }, { q: "x² - 5x - 50", a: -10, b: 5 }, { q: "x² + 12x + 32", a: 8, b: 4 }, { q: "x² - 12x + 32", a: -8, b: -4 },
-        { q: "x² + 4x - 32", a: 8, b: -4 }, { q: "x² - 4x - 32", a: -8, b: 4 }, { q: "x² + 14x + 45", a: 9, b: 5 }, { q: "x² - 14x + 45", a: -9, b: -5 }, { q: "x² + 4x - 45", a: 9, b: -5 },
-        // 81-90
-        { q: "x² - 4x - 45", a: -9, b: 5 }, { q: "x² + 18x + 80", a: 10, b: 8 }, { q: "x² - 18x + 80", a: -10, b: -8 }, { q: "x² + 2x - 80", a: 10, b: -8 }, { q: "x² - 2x - 80", a: -10, b: 8 },
-        { q: "x² + 16x + 64", a: 8, b: 8 }, { q: "x² - 16x + 64", a: -8, b: -8 }, { q: "x² + 25x + 100", a: 20, b: 5 }, { q: "x² - 25x + 100", a: -20, b: -5 }, { q: "x² + 15x - 100", a: 20, b: -5 },
-        // 91-100
-        { q: "x² - 15x - 100", a: -20, b: 5 }, { q: "x² + 20x + 96", a: 12, b: 8 }, { q: "x² - 20x + 96", a: -12, b: -8 }, { q: "x² + 4x - 96", a: 12, b: -8 }, { q: "x² - 4x - 96", a: -12, b: 8 },
-        { q: "x² + 22x + 121", a: 11, b: 11 }, { q: "x² - 22x + 121", a: -11, b: -11 }, { q: "x² + 26x + 120", a: 20, b: 6 }, { q: "x² - 26x + 120", a: -20, b: -6 }, { q: "x² + 14x - 120", a: 20, b: -6 }
+        // GROUP A: Products < 20 (Easy Start) - 30 items
+        { q: "x² + 4x + 3", a: 3, b: 1 }, { q: "x² - 4x + 3", a: -3, b: -1 }, { q: "x² + 2x - 3", a: 3, b: -1 }, { q: "x² - 2x - 3", a: -3, b: 1 },
+        { q: "x² + 5x + 4", a: 4, b: 1 }, { q: "x² - 5x + 4", a: -4, b: -1 }, { q: "x² + 3x - 4", a: 4, b: -1 }, { q: "x² - 3x - 4", a: -4, b: 1 },
+        { q: "x² + 5x + 6", a: 2, b: 3 }, { q: "x² - 5x + 6", a: -2, b: -3 }, { q: "x² + x - 6", a: 3, b: -2 }, { q: "x² - x - 6", a: -3, b: 2 },
+        { q: "x² + 6x + 8", a: 4, b: 2 }, { q: "x² - 6x + 8", a: -4, b: -2 }, { q: "x² + 2x - 8", a: 4, b: -2 }, { q: "x² - 2x - 8", a: -4, b: 2 },
+        { q: "x² + 7x + 10", a: 2, b: 5 }, { q: "x² - 7x + 10", a: -2, b: -5 }, { q: "x² + 3x - 10", a: 5, b: -2 }, { q: "x² - 3x - 10", a: -5, b: 2 },
+        { q: "x² + 8x + 12", a: 6, b: 2 }, { q: "x² - 8x + 12", a: -6, b: -2 }, { q: "x² + 4x - 12", a: 6, b: -2 }, { q: "x² - 4x - 12", a: -6, b: 2 }, { q: "x² + 13x + 12", a: 12, b: 1 },
+        { q: "x² + 7x + 12", a: 4, b: 3 }, { q: "x² - x - 12", a: -4, b: 3 }, { q: "x² + 11x + 18", a: 9, b: 2 }, { q: "x² - 11x + 18", a: -9, b: -2 }, { q: "x² + 7x - 18", a: 9, b: -2 },
+
+        // GROUP B: Products 20 to 50 (Medium) - 40 items
+        { q: "x² + 9x + 20", a: 4, b: 5 }, { q: "x² - 9x + 20", a: -4, b: -5 }, { q: "x² + x - 20", a: 5, b: -4 }, { q: "x² - x - 20", a: -5, b: 4 }, { q: "x² + 12x + 20", a: 10, b: 2 },
+        { q: "x² - 12x + 20", a: -10, b: -2 }, { q: "x² + 8x - 20", a: 10, b: -2 }, { q: "x² - 8x - 20", a: -10, b: 2 }, { q: "x² + 10x + 21", a: 7, b: 3 }, { q: "x² - 10x + 21", a: -7, b: -3 },
+        { q: "x² + 4x - 21", a: 7, b: -3 }, { q: "x² - 4x - 21", a: -7, b: 3 }, { q: "x² + 11x + 24", a: 8, b: 3 }, { q: "x² - 11x + 24", a: -8, b: -3 }, { q: "x² + 10x + 24", a: 6, b: 4 },
+        { q: "x² + 2x - 24", a: 6, b: -4 }, { q: "x² - 2x - 24", a: -6, b: 4 }, { q: "x² + 10x + 25", a: 5, b: 5 }, { q: "x² - 10x + 25", a: -5, b: -5 }, { q: "x² + 13x + 30", a: 10, b: 3 },
+        { q: "x² - 13x + 30", a: -10, b: -3 }, { q: "x² + 7x - 30", a: 10, b: -3 }, { q: "x² - 7x - 30", a: -10, b: 3 }, { q: "x² + 11x + 30", a: 6, b: 5 }, { q: "x² - x - 30", a: -6, b: 5 },
+        { q: "x² + x - 30", a: 6, b: -5 }, { q: "x² + 12x + 32", a: 8, b: 4 }, { q: "x² - 12x + 32", a: -8, b: -4 }, { q: "x² + 4x - 32", a: 8, b: -4 }, { q: "x² - 4x - 32", a: -8, b: 4 },
+        { q: "x² + 12x + 35", a: 7, b: 5 }, { q: "x² - 12x + 35", a: -7, b: -5 }, { q: "x² + 2x - 35", a: 7, b: -5 }, { q: "x² - 2x - 35", a: -7, b: 5 }, { q: "x² + 13x + 40", a: 8, b: 5 },
+        { q: "x² - 13x + 40", a: -8, b: -5 }, { q: "x² + 3x - 40", a: 8, b: -5 }, { q: "x² - 3x - 40", a: -8, b: 5 }, { q: "x² + 14x + 45", a: 9, b: 5 }, { q: "x² - 14x + 45", a: -9, b: -5 },
+
+        // GROUP C: Products 50 to 121 (Hard) - 30 items
+        { q: "x² + 4x - 45", a: 9, b: -5 }, { q: "x² - 4x - 45", a: -9, b: 5 }, { q: "x² + 14x + 48", a: 6, b: 8 }, { q: "x² - 14x + 48", a: -6, b: -8 }, { q: "x² + 2x - 48", a: 8, b: -6 },
+        { q: "x² - 2x - 48", a: -8, b: 6 }, { q: "x² + 15x + 50", a: 10, b: 5 }, { q: "x² - 15x + 50", a: -10, b: -5 }, { q: "x² + 5x - 50", a: 10, b: -5 }, { q: "x² - 5x - 50", a: -10, b: 5 },
+        { q: "x² + 16x + 60", a: 10, b: 6 }, { q: "x² - 16x + 60", a: -10, b: -6 }, { q: "x² + 4x - 60", a: 10, b: -6 }, { q: "x² - 4x - 60", a: -10, b: 6 }, { q: "x² + 16x + 64", a: 8, b: 8 },
+        { q: "x² - 16x + 64", a: -8, b: -8 }, { q: "x² + 17x + 72", a: 9, b: 8 }, { q: "x² - 17x + 72", a: -9, b: -8 }, { q: "x² + x - 72", a: 9, b: -8 }, { q: "x² - x - 72", a: -9, b: 8 },
+        { q: "x² + 18x + 80", a: 10, b: 8 }, { q: "x² - 18x + 80", a: -10, b: -8 }, { q: "x² + 2x - 80", a: 10, b: -8 }, { q: "x² - 2x - 80", a: -10, b: 8 }, { q: "x² + 19x + 90", a: 9, b: 10 },
+        { q: "x² - 19x + 90", a: -9, b: -10 }, { q: "x² + x - 90", a: 10, b: -9 }, { q: "x² - x - 90", a: -10, b: 9 }, { q: "x² + 25x + 100", a: 20, b: 5 }, { q: "x² + 26x + 120", a: 20, b: 6 }
     ];
 
     function startGame() {
@@ -305,8 +303,20 @@
         const grid = document.getElementById('grid');
         grid.innerHTML = '';
         
-        // Select 8 random distinct questions from the pool
-        const sets = [...questionPool].sort(() => 0.5 - Math.random()).slice(0, 8);
+        // --- Progressive Difficulty Logic ---
+        let allowedPool;
+        if (level <= 3) {
+            // First 3 levels: Only Group A (Numbers < 20)
+            allowedPool = questionPool.slice(0, 30);
+        } else if (level <= 7) {
+            // Level 4-7: Group A + B (Numbers < 50)
+            allowedPool = questionPool.slice(0, 70);
+        } else {
+            // Level 8+: Full Pool
+            allowedPool = questionPool;
+        }
+
+        const sets = [...allowedPool].sort(() => 0.5 - Math.random()).slice(0, 8);
         const tiles = [];
 
         sets.forEach(set => {
